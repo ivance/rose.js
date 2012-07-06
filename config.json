@@ -1,0 +1,26 @@
+{
+	"public":{
+		"encoding"      :"utf8",
+		"view_folder"   :"/views",
+		"view_engine"   :"jade",
+		"static_folder" :"/public",
+		"port"          :3000,
+		"session_secret":"rose",
+		"cache_path"    :"./cache/",
+		"base_url"      :"http://localhost:3000"
+	},
+	"development":{
+		"db_host"    :"202.85.215.74",
+		"db_user"    :"lenovo_city",
+		"db_password":"YYYstudy.com",
+		"db_database":"lenovo_city_survey",
+		"db_port"    :3306
+	},
+	"production":{
+		"db_host"    :"202.85.215.74",
+		"db_user"    :"lenovo_city",
+		"db_password":"YYYstudy.com",
+		"db_database":"lenovo_city_survey",
+		"db_port"    :3306
+	}
+}
