@@ -1,0 +1,6 @@
+{
+	"succ_get":"获取成功",
+	"succ_update":"更新成功",
+	"error_get":"获取失败",
+	"error_update":"更新失败"
+}

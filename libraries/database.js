@@ -31,7 +31,7 @@ var Database = function(){
 		this._client.query(sql,params,function(err,rows,fields) {
 			if(err){
 				console.log(err);
-				rows = [];
+				rows = false;
 			}
 			callback(rows);
 		});
@@ -67,24 +67,31 @@ var Database = function(){
 
 	this.insert = function(table,params,callback){
 		var sql = 'INSERT INTO '+table+'(';
-		params[0].each(function(key,value){
-			sql += '`'+key+'`,'
-		});
+		for(var key in params[0]){
+			if(params[0].hasOwnProperty(key)){
+				sql += '`'+key+'`,';
+			}
+		}
 		sql = sql.substring(0,sql.length-1);
 		sql += ') VALUES';
-		params.each(function(index,record){
-			sql += '(';
-			record.each(function(key,value){
-				if(typeof(value) == 'number'){
-					sql += value;	
-				}else{
-					sql += '"'+value+'"'
+		for(var index in params){
+			if(params.hasOwnProperty(index)){
+				sql += '(';
+				var record = params[index];
+				for(var key in record){
+					if(record.hasOwnProperty(key)){
+						if(typeof(record[key]) == 'number'){
+							sql += record[key];	
+						}else{
+							sql += '"'+record[key]+'"'
+						}
+						sql += ',';
+					}
 				}
-				sql += ',';
-			});
-			sql = sql.substring(0,sql.length-1);
-			sql += '),';
-		});
+				sql = sql.substring(0,sql.length-1);
+				sql += '),';
+			}
+		}
 		sql = sql.substring(0,sql.length-1);
 		
 		this.query(sql,[],callback);
@@ -93,18 +100,24 @@ var Database = function(){
 	this.delete = function(table,params,callback){
 		var sql = 'DELETE FROM '+table+' WHERE ';
 		var and = false;
-		params.each(function(index,record){
-			record.each(function(key,value){
-				if(and) sql += ' AND ';
-				sql += '`'+key+'`=';
-				if(typeof(value) == 'number'){
-					sql += value;	
-				}else{
-					sql += '"'+value+'"'
+		for(var index in params){
+			if(params.hasOwnProperty(index)){
+				record = params[index];
+				for(var key in record){
+					if(record.hasOwnProperty(key)){
+						value = record[key];
+						if(and) sql += ' AND ';
+						sql += '`'+key+'`=';
+						if(typeof(value) == 'number'){
+							sql += value;	
+						}else{
+							sql += '"'+value+'"'
+						}
+						and = true;
+					}
 				}
-				and = true;
-			});
-		});
+			}
+		}
 
 		this.query(sql,[],callback);
 	}
@@ -112,26 +125,33 @@ var Database = function(){
 	this.update = function(table,inquiry,params,callback){
 		var sql = 'UPDATE '+table+' SET ';
 		var where = '';
-		params.each(function(index,record){
-			record.each(function(key,value){
-				if(key != inquiry){
-					sql += '`'+key+'`=';
-					if(typeof(value) == 'number'){
-						sql += value;
-					}else{
-						sql += '"'+value+'"'
-					}
-					sql += ',';
-				}else{
-					where = 'WHERE `'+inquiry+'` = ';
-					if(typeof(value) == 'number'){
-						where += value;
-					}else{
-						where += '"'+value+'"'
+
+		for(var index in params){
+			if(params.hasOwnProperty(index)){
+				record = params[index];
+				for(var key in record){
+					if(record.hasOwnProperty(key)){
+						value = record[key];
+						if(key != inquiry){
+							sql += '`'+key+'`=';
+							if(typeof(value) == 'number'){
+								sql += value;
+							}else{
+								sql += '"'+value+'"'
+							}
+							sql += ',';
+						}else{
+							where = 'WHERE `'+inquiry+'` = ';
+							if(typeof(value) == 'number'){
+								where += value;
+							}else{
+								where += '"'+value+'"'
+							}
+						}
 					}
 				}
-			});
-		});
+			}
+		}
 		sql = sql.substring(0,sql.length-1);
 		sql += ' '+where;
 

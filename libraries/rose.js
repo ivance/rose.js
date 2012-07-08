@@ -1,6 +1,9 @@
 var Rose = function(){
+	var fs = require('fs');
+
 	this.env = process.env.NODE_ENV || 'development';
 	this.config = require('../config');
+	this.language = require('../languages/'+this.config['public']['default_language']+'/message.json');
 	this.database = require('./database.js');
 	this.session = require('./session.js');
 	this.cache = require('./cache.js');
@@ -13,14 +16,21 @@ var Rose = function(){
 		this.database.set('user',this.config[this.env]['db_user']);
 		this.database.set('password',this.config[this.env]['db_password']);
 		this.database.set('database',this.config[this.env]['db_database']);
+		this.database.set('port',this.config[this.env]['db_port']);
 		this.database.init();
-		this.uri.init(req);
+		this.uri.init(req,this.config['public']['default_route']);
 		this.session.init(req);
 		this.cache.init(this.config['public']['cache_path'],this.config['public']['encoding']);
 	}
 
-	this.destructor = function(){
-		this.database.close();
+	this.load = function(type,name,code){
+		if(!this.hasOwnProperty(code)){
+			var file = './'+type+'/'+name+'.js';
+
+			if(fs.existsSync(file)){
+				this[code] = require('../'+type+'/'+name+'.js');
+			}
+		}
 	}
 
 	this.validate = function(input){
@@ -28,7 +38,7 @@ var Rose = function(){
 		if(type == 'string'){
 			return input.length>0?true:false;
 		}else if(type == 'object'){
-			return input.isEmpty()?false:true;
+			return this.isEmpty(input)?false:true;
 		}else if(type == 'undefined'){
 			return false;
 		}else{
@@ -53,25 +63,31 @@ var Rose = function(){
 			return '';
 		}
 	}
+
+	this.each = function(input,callback){
+		var type = typeof(input);
+		if(type == 'object'){
+			for(var key in input){
+				if(input.hasOwnProperty(key)){
+					callback(key,input[key]);
+				}
+			}
+		}else{
+			callback(0,input);
+		}
+	}
+
+	this.isEmpty = function(input){
+		var type = typeof(input);
+		if(type == 'object'){
+			for(var key in input){
+				if(input.hasOwnProperty(key)){
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 }
 
 module.exports = new Rose();
-
-Object.prototype.each =function(fn) {
-	var me = this;
-	for(var key in me) {
-		if(me.hasOwnProperty(key)){
-			fn(key,me[key]);
-		}
-	}
-}
-
-Object.prototype.isEmpty =function() {
-	var me = this;
-	for(var key in me) {
-		if(me.hasOwnProperty(key)){
-			return false;
-		}
-	}
-	return true;
-}

@@ -5,16 +5,18 @@ var URI = function(){
 	this.primRoute = null;
 	this.primAction = null;
 	this.params = null;
+	this.request = {};
 
-	this.init = function(req){
+	this.init = function(req,default_route){
 		var params = req.params.toString().split('/');
 		var key = [];
 		
-		params.each(function(i,item){
-			if(item != '') key.push(item);
-		});
+		for(var i in params){
+			if(params.hasOwnProperty(i) && params[i] != '') key.push(params[i]);
+		}
+
 		if(key.length==0){
-			this.route = 'index';
+			this.route = default_route;
 			this.primRoute = false;
 		}else{
 			this.route = key[0];
@@ -28,6 +30,8 @@ var URI = function(){
 			this.primAction = key[1];
 		}
 		this.params = key.slice(2);
+
+		this.request = req.body;
 	}
 }
 

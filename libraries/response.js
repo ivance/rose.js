@@ -38,7 +38,7 @@ var Response = function(){
 	}
 
 	this.setSuccess = function(input){
-		if(input.constructor === String){
+		if(typeof(input) == 'boolean'){
 			this.resp["success"] = input;
 		}
 	}
@@ -49,7 +49,7 @@ var Response = function(){
 
 	this.echo = function(){
 		if(this._res != null){
-			this._res.json(this.resp);
+			this._res.send(this.resp);
 		}
 	}
 
@@ -57,7 +57,13 @@ var Response = function(){
 		if(this._res != null){
 			this.resp["success"] = false;
 			this.resp["detail"] = 'Resource Not Found.';
-			this._res.json(this.resp);
+			this._res.send(this.resp);
+		}
+	}
+
+	this.render = function(str){
+		if(this._res != null){
+			this._res.render(str);
 		}
 	}
 }

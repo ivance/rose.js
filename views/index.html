@@ -1,0 +1,219 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+	<meta charset="utf-8"> 
+	<title>Feedback Tracking System</title> 
+ 
+	<!-- Le styles --> 
+	<link href="http://localhost/rose.js/public/css/bootstrap.css" rel="stylesheet"> 
+	<link href="http://localhost/rose.js/public/css/bootstrap-responsive.css" rel="stylesheet"> 
+ 
+	<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements --> 
+	<!--[if lt IE 9]>
+		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]--> 
+
+</head>
+
+<body>
+
+<!-- BOF header -->
+<div class="navbar">
+	<div class="navbar-inner">
+		<div class="container">
+			<a class="brand" href="#">Fetas</a>
+			<ul class="nav"> 
+				<li class="active"><a href="#">Home</a></li> 
+				<li><a href="#about">About</a></li> 
+				<li><a href="#contact">Contact</a></li> 
+			</ul> 
+
+			<ul class="nav pull-right"> 
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user icon-white"></i>&nbsp;admin&nbsp;<b class="caret"></b></a>
+					<ul class="dropdown-menu">
+						<li><a href="#">Change Password</a></li>
+						<li class="divider"></li>
+						<li><a href="#">Logout</a></li>
+					</ul>
+				</li> 
+			</ul> 
+		</div>
+	</div>
+</div>
+<!-- EOF header -->
+
+<!-- BOF Create Thread Window -->
+<div id="createThreadWnd" class="modal hide fade" style="display: none; ">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal">×</button>
+		<h3>新建问题</h3>
+	</div>
+	<div class="modal-body">
+		<form id="createThreadForm" method="POST" class="form-vertical"><fieldset>
+			<div class="control-group">
+				<label class="control-label" for="project_id">项目</label>
+				<div class="controls">
+					<select id="project_id" disabled></select>
+					<i id="project_id_loading" class="icon-refresh"></i>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="thread_priority">优先级</label>
+				<div class="controls">
+					<select id="thread_priority">
+					<option value="3">低优先级</option>
+					<option value="2" selected="true">普通</option>
+					<option value="1">紧急</option>
+					</select>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="thread_priority">内容</label>
+				<div class="controls">
+					<textarea class="input-xlarge span5" id="thread_content" rows="10"></textarea>
+				</div>
+			</div>
+		</fieldset></form>
+	</div>
+	<div class="modal-footer">
+		<a id="btnCreateThreadCancel" href="#" class="btn" data-dismiss="modal">取消</a>
+		<a id="btnCreateThreadSave" href="#" class="btn btn-primary">保存</a>
+	</div>
+</div>
+<!-- EOF Create Thread Window -->
+
+<!-- BOF Content -->
+<div class="container">
+
+<div id="alertSuccess" class="alert alert-success hide"><strong id="alertSuccessText"></strong><button type="button" class="close" data-dismiss="alert">×</button></div>
+<div id="alertError" class="alert alert-error hide"><strong id="alertSuccessText"></strong><button type="button" class="close" data-dismiss="alert">×</button></div>
+
+<div class="row-fluid">
+
+
+	<!-- BOF Left -->
+	<div class="span6">
+		<table class="table table-condensed">
+			<thead><tr>
+				<th>Thread ID</th>
+				<th>Project</th>
+				<th>Summary</th>
+				<th>Last Modified</th>
+			</tr></thead>
+			<tbody>
+				<tr>
+					<td>…</td>
+					<td>…</td>
+					<td>…</td>
+					<td>…</td>
+				</tr>
+			</tbody>
+		</table>
+		<a data-toggle="modal" href="#createThreadWnd" class="btn btn-primary">新建问题</a>
+	</div>
+	<!-- EOF Left -->
+
+	<!-- BOF Right -->
+	<div class="span6">
+		<table class="table table-condensed">
+			<thead><tr>
+				<th>Message</th>
+				<th>Time</th>
+			</tr></thead>
+			<tbody>
+				<tr>
+					<td>…</td>
+					<td>…</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<!-- EOF Right -->
+</div>
+</div>
+<!-- EOF Content -->
+
+
+<script src="http://localhost/rose.js/public/js/jquery.js"></script>
+<script src="http://localhost/rose.js/public/js/bootstrap-dropdown.js"></script> 
+<script src="http://localhost/rose.js/public/js/bootstrap-modal.js"></script> 
+<script src="http://localhost/rose.js/public/js/bootstrap-transition.js"></script> 
+<script src="http://localhost/rose.js/public/js/bootstrap-alert.js"></script> 
+
+<!-- Public -->
+<script type="text/javascript">
+var apiBaseUrl = 'http://localhost:3000/api/';
+</script>
+
+<!-- Project List -->
+<script type="text/javascript">
+var projectList = null;
+$('#createThreadWnd').on('show', function () {
+	if(projectList == null){
+		$.ajax({
+			type: "POST",
+			url: apiBaseUrl+"getActiveProjectList",
+			data: "",
+			success: function(msg){
+				if(msg.success){
+					projectList = msg.items;
+				}
+
+				if(projectList != null && projectList.length>0){
+					var len = projectList.length;
+					$.each(projectList,function(i,item){
+						var option = document.createElement('option');
+						$(option).html(item['project_name']);
+						$(option).attr('value',item['project_id']);
+						if(i == len-1){
+							$(option).attr('selected',true);
+						}
+						$("#project_id").append(option);
+					});
+					$("#project_id").attr("disabled",false);
+					$("#project_id_loading").remove();
+				}
+			}
+		});
+	}
+});
+
+$('#btnCreateThreadSave').bind('click', function() {
+	var project_id = $("#project_id option:selected").attr('value');
+	var thread_priority = $("#thread_priority option:selected").attr('value');
+	var thread_content = $("#thread_content").attr('value');
+	var data = 'project_id='+project_id+'&thread_priority='+thread_priority+'&thread_content='+thread_content;
+	$.ajax({
+		type: "POST",
+		url: apiBaseUrl+"createThread",
+		data: data,
+		success: function(msg){
+			if(msg.success){
+				$("#alertSuccessText").append(msg.detail);
+				$("#alertSuccess").show();
+			}else{
+				$("#alertErrorText").append(msg.detail);
+				$("#alertError").show();
+			}
+			$('#createThreadWnd').modal('hide');
+		}
+	});
+});
+$('#btnCreateThreadCancel').bind('click', function() {
+	$("#thread_content").empty();
+});
+$('#alertSuccess').bind('close', function () {
+	$("#alertSuccessText").empty();
+	$("#alertSuccess").hide();
+	return false;
+});
+$('#alertError').bind('close', function () {
+	$("#alertErrorText").empty();
+	$("#alertError").hide();
+	return false;
+})
+</script>
+
+</body> 
+</html>
