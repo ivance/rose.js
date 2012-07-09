@@ -60,8 +60,8 @@ app.all('*', function(req,res,next){
 		}
 
 		if(!exists){
-			return;
-			//rose.response.notFound();
+			//return;
+			rose.response.notFound();
 		}
 	});
 });

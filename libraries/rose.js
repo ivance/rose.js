@@ -3,6 +3,7 @@ var Rose = function(){
 
 	this.env = process.env.NODE_ENV || 'development';
 	this.config = require('../config');
+	this.define = require('../define');
 	this.language = require('../languages/'+this.config['public']['default_language']+'/message.json');
 	this.database = require('./database.js');
 	this.session = require('./session.js');
@@ -33,10 +34,16 @@ var Rose = function(){
 		}
 	}
 
+	this.now = function(){
+		var d = new Date();
+		var now = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()+' '+d.getHours()+':'+d.getMinutes()+':'+d.getSeconds();
+		return now;
+	}
+
 	this.validate = function(input){
 		var type = typeof(input);
 		if(type == 'string'){
-			return input.length>0?true:false;
+			return (input.length>0 && input !='undefined')?true:false;
 		}else if(type == 'object'){
 			return this.isEmpty(input)?false:true;
 		}else if(type == 'undefined'){

@@ -39,7 +39,13 @@ var Thread = function(){
 	this.validateCreateThreadInfo = function(input,callback){
 		var result = [];
 		var succ = true;
-		if(input.project_id === undefined || !_rose.validate(input.project_id)){
+		var user = _rose.session.get('user');
+		user = [];user['user_id'] = 1;//todo
+		if(user === false){
+			_rose.response.setSuccess(false);
+			_rose.response.setDetail(_rose.language['error_update']);
+			succ = false;
+		}else if(input.project_id === undefined || !_rose.validate(input.project_id)){
 			_rose.response.setSuccess(false);
 			_rose.response.setDetail(_rose.language['error_update']);
 			succ = false;
@@ -56,6 +62,11 @@ var Thread = function(){
 				'project_id':_rose.numval(input.project_id),
 				'thread_priority':_rose.numval(input.thread_priority),
 				'thread_content':_rose.strval(input.thread_content),
+				'thread_summary':_rose.strval(input.thread_content).substring(0,3),
+				'thread_status':_rose.define.THREAD_STATUS_NEW,
+				'thread_user_create':user.user_id,
+				'thread_user_modified':user.user_id,
+				'thread_time_create':_rose.now()
 			});
 		}
 		callback(succ,result);
